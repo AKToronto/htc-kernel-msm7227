@@ -71,7 +71,6 @@ struct dhd_bus *g_bus;
 
 static struct wifi_platform_data *wifi_control_data = NULL;
 static struct resource *wifi_irqres = NULL;
-static int module_remove = 0;
 
 #if 0
 extern int htc_linux_periodic_wakeup_init(void);
@@ -996,12 +995,15 @@ dhd_start_xmit(struct sk_buff *skb, struct net_device *net)
 	int ifidx;
 
 	DHD_TRACE(("%s: Enter\n", __FUNCTION__));
+<<<<<<< HEAD
 	if (module_remove) {
 		DHD_ERROR(("%s: module removed.", __FUNCTION__));
 		netif_stop_queue(net);
 		dev_kfree_skb(skb); // Add to free skb
 		return -ENODEV;
 	}
+=======
+>>>>>>> 181ae3b... update bcm4329
 
 	/* Reject if down */
 	if (!dhd->pub.up || (dhd->pub.busstate == DHD_BUS_DOWN)) {
@@ -1086,6 +1088,7 @@ dhd_rx_frame(dhd_pub_t *dhdp, int ifidx, void *pktbuf, int numpkt)
 
 	DHD_TRACE(("%s: Enter\n", __FUNCTION__));
 
+<<<<<<< HEAD
 	if (module_remove || (!dhd->pub.up)) {
 		for (i = 0; pktbuf && i < numpkt; i++, pktbuf = pnext) {
 			pnext = PKTNEXT(dhdp->osh, pktbuf);
@@ -1100,6 +1103,8 @@ dhd_rx_frame(dhd_pub_t *dhdp, int ifidx, void *pktbuf, int numpkt)
 		return;
 	}
 
+=======
+>>>>>>> 181ae3b... update bcm4329
 	save_pktbuf = pktbuf;
 
 	for (i = 0; pktbuf && i < numpkt; i++, pktbuf = pnext) {
@@ -1601,10 +1606,6 @@ dhd_ioctl_entry(struct net_device *net, struct ifreq *ifr, int cmd)
 	int ifidx;
 	bool is_set_key_cmd;
 
-	if (module_remove) {
-		DHD_ERROR(("%s: module removed. cmd 0x%04x\n", __FUNCTION__, cmd));
-		return -1;
-	}
 
 	/* BRCM: anthoy, add for debug, reject if down */
 	if ( !dhd->pub.up || (dhd->pub.busstate == DHD_BUS_DOWN)){
@@ -1763,11 +1764,6 @@ dhd_open(struct net_device *net)
 	uint32 toe_ol;
 #endif
 	int ifidx;
-
-	if (module_remove) {
-		DHD_ERROR(("%s: module removed. Just return.\n", __FUNCTION__));
-		return -1;
-	}
 
 	wl_control_wl_start(net);  /* start if needed */
 
@@ -2426,14 +2422,15 @@ fail_0:
 
 /* work-around for stop the wlc_ioctl early. */
 extern void disable_dev_wlc_ioctl(void);
+extern void wl_iw_force_deauth(void); 
 
 static void __exit
 dhd_module_cleanup(void)
 {
 	DHD_TRACE(("%s: Enter\n", __FUNCTION__));
 
+	wl_iw_force_deauth();
 	disable_dev_wlc_ioctl();
-	module_remove = 1;
 	DHD_DEFAULT((KERN_INFO "%s: bcm4329 module remove\n", __func__));
 #if 0
 	htc_linux_periodic_wakeup_stop();
@@ -2462,10 +2459,8 @@ dhd_os_proto_block(dhd_pub_t *pub)
 	dhd_info_t *dhd = (dhd_info_t *)(pub->info);
 
 	if (dhd) {
-		if (down_timeout(&dhd->proto_sem, msecs_to_jiffies(5000)) != 0)
-			return -1;
-		else
-			return 1;
+		down(&dhd->proto_sem);
+		return 1;
 	}
 
 	return 0;
