@@ -369,7 +369,32 @@ void android_register_function(struct android_usb_function *f)
 		bind_functions(dev);
 }
 
+<<<<<<< HEAD
 void android_enable_function(struct usb_function *f, int enable)
+=======
+
+static char *sysfs_allowed[] = {
+	"rndis",
+	"mtp",
+	"adb",
+	"accessory",
+};
+
+static int is_sysfschange_allowed(struct usb_function *f)
+{
+	char **functions = sysfs_allowed;
+	int count = ARRAY_SIZE(sysfs_allowed);
+	int i;
+
+	for (i = 0; i < count; i++) {
+		if (!strncmp(f->name, functions[i], 32))
+			return 1;
+	}
+	return 0;
+}
+
+int android_enable_function(struct usb_function *f, int enable)
+>>>>>>> 6f695bb... USB: gadget: Add accessory to allowed functions through sysfs
 {
 	struct android_dev *dev = _android_dev;
 	int disable = !enable;
