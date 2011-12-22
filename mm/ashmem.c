@@ -670,9 +670,12 @@ static unsigned int kgsl_virtaddr_to_physaddr(unsigned int virtaddr)
 
 static int ashmem_flush_cache_range(struct ashmem_area *asma)
 {
+	int ret = 0;
+	struct vm_area_struct *vma;
 #ifdef CONFIG_OUTER_CACHE
 	unsigned long end;
 #endif
+<<<<<<< HEAD
 	unsigned long addr;
 	unsigned int size, result = 0;
 
@@ -689,6 +692,30 @@ static int ashmem_flush_cache_range(struct ashmem_area *asma)
 	flush_cache_user_range(addr, addr + size);
 #ifdef CONFIG_OUTER_CACHE
 	for (end = addr; end < (addr + size); end += PAGE_SIZE) {
+=======
+	if (!asma->vm_start)
+		return -EINVAL;
+
+	down_read(&current->mm->mmap_sem);
+	vma = find_vma(current->mm, asma->vm_start);
+	if (!vma) {
+		ret = -EINVAL;
+		goto done;
+	}
+	if (vma->vm_file != asma->file) {
+		ret = -EINVAL;
+		goto done;
+	}
+	if ((asma->vm_start + asma->size) > (vma->vm_start + vma->vm_end)) {
+		ret = -EINVAL;
+		goto done;
+	}
+#ifndef CONFIG_OUTER_CACHE
+	cache_func(asma->vm_start, asma->size, 0);
+#else
+	for (vaddr = asma->vm_start; vaddr < asma->vm_start + asma->size;
+		vaddr += PAGE_SIZE) {
+>>>>>>> 4ed09de... mm: ashmem: Make sure vma is valid while flushing
 		unsigned long physaddr;
 		physaddr = kgsl_virtaddr_to_physaddr(end);
 		if (!physaddr) {
@@ -701,8 +728,15 @@ static int ashmem_flush_cache_range(struct ashmem_area *asma)
 	mb();
 #endif
 done:
+<<<<<<< HEAD
 	mutex_unlock(&ashmem_mutex);
 	return 0;
+=======
+	up_read(&current->mm->mmap_sem);
+	if (ret)
+		asma->vm_start = 0;
+	return ret;
+>>>>>>> 4ed09de... mm: ashmem: Make sure vma is valid while flushing
 }
 
 static long ashmem_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
