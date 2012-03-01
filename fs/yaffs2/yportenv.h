@@ -1,11 +1,7 @@
 /*
  * YAFFS: Yet another Flash File System . A NAND-flash specific file system.
  *
-<<<<<<< HEAD
  * Copyright (C) 2002-2010 Aleph One Ltd.
-=======
- * Copyright (C) 2002-2011 Aleph One Ltd.
->>>>>>> 1e6c135... yaffs2: Import YAFFS2 as of Mon, 7 Mar 2011 03:25:28 +0000
  *   for Toby Churchill Ltd and Brightstar Engineering
  *
  * Created by Charles Manning <charles@aleph1.co.uk>
@@ -16,6 +12,7 @@
  *
  * Note: Only YAFFS headers are LGPL, YAFFS C code is covered by GPL.
  */
+
 
 #ifndef __YPORTENV_H__
 #define __YPORTENV_H__
@@ -28,9 +25,15 @@
 
 #define MTD_VERSION(a, b, c) (((a) << 16) + ((b) << 8) + (c))
 
-#ifdef YAFFS_OUT_OF_TREE
+#if defined CONFIG_YAFFS_WINCE
+
+#include "ywinceenv.h"
+
+#elif defined __KERNEL__
+
 #include "moduleconfig.h"
-#endif
+
+/* Linux kernel */
 
 #include <linux/version.h>
 #define MTD_VERSION_CODE LINUX_VERSION_CODE
@@ -38,11 +41,7 @@
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(2, 6, 19))
 #include <linux/config.h>
 #endif
-<<<<<<< HEAD
 
-=======
-#include <linux/version.h>
->>>>>>> 1e6c135... yaffs2: Import YAFFS2 as of Mon, 7 Mar 2011 03:25:28 +0000
 #include <linux/kernel.h>
 #include <linux/mm.h>
 #include <linux/sched.h>
@@ -50,7 +49,6 @@
 #include <linux/slab.h>
 #include <linux/vmalloc.h>
 #include <linux/xattr.h>
-<<<<<<< HEAD
 
 #define YCHAR char
 #define YUCHAR unsigned char
@@ -64,24 +62,10 @@
 #define yaffs_toupper(a)       toupper(a)
 
 #define Y_INLINE __inline__
-=======
-#include <linux/list.h>
-#include <linux/types.h>
-#include <linux/fs.h>
-#include <linux/stat.h>
-#include <linux/sort.h>
-#include <linux/bitops.h>
-
-/*  These type wrappings are used to support Unicode names in WinCE. */
-#define YCHAR char
-#define YUCHAR unsigned char
-#define _Y(x)     x
->>>>>>> 1e6c135... yaffs2: Import YAFFS2 as of Mon, 7 Mar 2011 03:25:28 +0000
 
 #define YAFFS_LOSTNFOUND_NAME		"lost+found"
 #define YAFFS_LOSTNFOUND_PREFIX		"obj"
 
-<<<<<<< HEAD
 /* #define YPRINTF(x) printk x */
 #define YMALLOC(x) kmalloc(x, GFP_NOFS)
 #define YFREE(x)   kfree(x)
@@ -91,8 +75,6 @@
 
 #define YYIELD() schedule()
 #define Y_DUMP_STACK() dump_stack()
-=======
->>>>>>> 1e6c135... yaffs2: Import YAFFS2 as of Mon, 7 Mar 2011 03:25:28 +0000
 
 #define YAFFS_ROOT_MODE			0755
 #define YAFFS_LOSTNFOUND_MODE		0700
@@ -105,7 +87,6 @@
 #define Y_TIME_CONVERT(x) (x)
 #endif
 
-<<<<<<< HEAD
 #define yaffs_SumCompare(x, y) ((x) == (y))
 #define yaffs_strcmp(a, b) strcmp(a, b)
 
@@ -347,17 +328,6 @@
 	Y_DUMP_STACK();\
 } while (0)
 #endif
-=======
-#define compile_time_assertion(assertion) \
-	({ int x = __builtin_choose_expr(assertion, 0, (void)0); (void) x; })
-
-
-#define yaffs_trace(msk, fmt, ...) do { \
-	if (yaffs_trace_mask & (msk)) \
-		printk(KERN_DEBUG "yaffs: " fmt "\n", ##__VA_ARGS__); \
-} while (0)
-
->>>>>>> 1e6c135... yaffs2: Import YAFFS2 as of Mon, 7 Mar 2011 03:25:28 +0000
 
 
 #endif

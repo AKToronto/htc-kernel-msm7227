@@ -1,11 +1,7 @@
 /*
  * YAFFS: Yet Another Flash File System. A NAND-flash specific file system.
  *
-<<<<<<< HEAD
  * Copyright (C) 2002-2010 Aleph One Ltd.
-=======
- * Copyright (C) 2002-2011 Aleph One Ltd.
->>>>>>> 1e6c135... yaffs2: Import YAFFS2 as of Mon, 7 Mar 2011 03:25:28 +0000
  *   for Toby Churchill Ltd and Brightstar Engineering
  *
  * Created by Charles Manning <charles@aleph1.co.uk>
@@ -43,15 +39,9 @@ void yaffs_load_current_time(struct yaffs_obj *obj, int do_a, int do_c)
 {
 	obj->yst_mtime = Y_CURRENT_TIME;
 	if (do_a)
-<<<<<<< HEAD
 		obj->yst_atime = obj->yst_atime;
 	if (do_c)
 		obj->yst_ctime = obj->yst_atime;
-=======
-		obj->yst_atime = obj->yst_mtime;
-	if (do_c)
-		obj->yst_ctime = obj->yst_mtime;
->>>>>>> 1e6c135... yaffs2: Import YAFFS2 as of Mon, 7 Mar 2011 03:25:28 +0000
 }
 
 void yaffs_attribs_init(struct yaffs_obj *obj, u32 gid, u32 uid, u32 rdev)
@@ -74,11 +64,7 @@ loff_t yaffs_get_file_size(struct yaffs_obj *obj)
 		alias = obj->variant.symlink_variant.alias;
 		if (!alias)
 			return 0;
-<<<<<<< HEAD
 		return yaffs_strnlen(alias, YAFFS_MAX_ALIAS_LENGTH);
-=======
-		return strnlen(alias, YAFFS_MAX_ALIAS_LENGTH);
->>>>>>> 1e6c135... yaffs2: Import YAFFS2 as of Mon, 7 Mar 2011 03:25:28 +0000
 	default:
 		return 0;
 	}
