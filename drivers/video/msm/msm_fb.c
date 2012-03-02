@@ -337,8 +337,8 @@ restart:
 
 	sleeping = msmfb->sleeping;
 	/* on a full update, if the last frame has not completed, wait for it */
-	if (pan_display && (msmfb->frame_requested != msmfb->frame_done ||
-			    sleeping == UPDATING)) {
+	if ((pan_display && msmfb->frame_requested != msmfb->frame_done) ||
+			    sleeping == UPDATING) {
 		int ret;
 		spin_unlock_irqrestore(&msmfb->update_lock, irq_flags);
 		/* Shorten delay time when apply vsync recover mechanism*/
@@ -989,12 +989,7 @@ static int msmfb_ioctl(struct fb_info *p, unsigned int cmd, unsigned long arg)
 		break;
 #ifdef CONFIG_FB_MSM_OVERLAY
 	case MSMFB_OVERLAY_GET:
-		if(!atomic_read(&mdpclk_on)) {
-			PR_DISP_WARN("MSMFB_OVERLAY_GET during suspend\n");
-			ret = -EINVAL;
-		} else
-			ret = msmfb_overlay_get(p, argp);
-		PR_DISP_INFO("MSMFB_OVERLAY_GET ret=%d\n", ret);
+		ret = msmfb_overlay_get(p, argp);
 		break;
 	case MSMFB_OVERLAY_SET:
 		if(!atomic_read(&mdpclk_on)) {
@@ -1240,6 +1235,7 @@ static int msmfb_probe(struct platform_device *pdev)
 	msmfb->xres = panel->fb_data->xres;
 	msmfb->yres = panel->fb_data->yres;
 	msmfb->overrides = panel->fb_data->overrides;
+	setup_fb_info(msmfb);
 	ret = setup_fbmem(msmfb, pdev);
 	if (ret)
 		goto error_setup_fbmem;
@@ -1248,8 +1244,6 @@ static int msmfb_probe(struct platform_device *pdev)
 	/* Jay, 8/1/09' */
 	msmfb_set_var(msmfb->fb->screen_base, 0);
 #endif
-
-	setup_fb_info(msmfb);
 
 	spin_lock_init(&msmfb->update_lock);
 	mutex_init(&msmfb->panel_init_lock);
@@ -1309,12 +1303,6 @@ static int msmfb_probe(struct platform_device *pdev)
 	msmfb->fake_vsync.function = msmfb_fake_vsync;
 
 	ret = register_framebuffer(fb);
-
-	if(fb->node == 0)
-		mdp->fb0 = msmfb->fb;
-	else
-		mdp->fb1 = msmfb->fb;
-
 	if (ret)
 		goto error_register_framebuffer;
 

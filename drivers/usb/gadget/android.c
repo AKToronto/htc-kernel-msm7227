@@ -369,6 +369,7 @@ void android_register_function(struct android_usb_function *f)
 		bind_functions(dev);
 }
 
+
 static char *sysfs_allowed[] = {
 	"rndis",
 	"mtp",
@@ -394,6 +395,8 @@ int android_enable_function(struct usb_function *f, int enable)
 	struct android_dev *dev = _android_dev;
 	int disable = !enable;
 
+	if (!is_sysfschange_allowed(f))
+		return -EINVAL;
 	if (!!f->disabled != disable) {
 		usb_function_set_enabled(f, !disable);
 
@@ -446,6 +449,7 @@ int android_enable_function(struct usb_function *f, int enable)
 		}
 		usb_composite_force_reset(dev->cdev);
 	}
+	return 0;
 }
 
 static int android_probe(struct platform_device *pdev)
